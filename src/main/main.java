@@ -100,7 +100,7 @@ public class main {
         }
     }
 
-    //Admin Menu
+    // Admin Menu 
     public static void adminMenu() {
         while (true) {
             System.out.println("\n--- ADMIN MENU ---");
@@ -111,9 +111,17 @@ public class main {
             System.out.println("5. View All Bookings");
             System.out.println("6. Delete Bookings");
             System.out.println("7. Manage Movies of the Month");
-            System.out.println("8. Logout");
-            System.out.print("Enter choice (1-8): ");
+            System.out.println("8. Manage Transactions");
+            System.out.println("9. Logout");
+            System.out.print("Enter choice (1-9): ");
+
+            if (!sc.hasNextInt()) {
+                System.out.println("❌ Invalid input. Please enter a number 1-9.");
+                sc.nextLine();
+                continue;
+            }
             int ch = sc.nextInt();
+            sc.nextLine();
 
             switch (ch) {
                 case 1:
@@ -125,47 +133,207 @@ public class main {
 
                 case 2:
                     System.out.print("Enter User ID to approve: ");
+                    if (!sc.hasNextInt()) {
+                        System.out.println("❌ Invalid ID.");
+                        sc.nextLine();
+                        break;
+                    }
                     int id = sc.nextInt();
+                    sc.nextLine();
                     String upd = "UPDATE user_table SET u_status = ? WHERE u_id = ?";
                     con.updateRecord(upd, "Approved", id);
                     System.out.println("✅ User approved!");
                     break;
 
                 case 3:
-                    System.out.print("Enter User ID to update: ");
-                    int uid = sc.nextInt();
-                    System.out.print("Enter new name: ");
-                    String newName = sc.next();
-                    System.out.print("Enter new email: ");
-                    String newEmail = sc.next();
-                    System.out.print("Enter new role (Admin/Customer): ");
-                    String newRole = sc.next();
-                    String sqlUpdateUser = "UPDATE user_table SET u_name = ?, u_email = ?, u_role = ? WHERE u_id = ?";
-                    con.updateRecord(sqlUpdateUser, newName, newEmail, newRole, uid);
-                    System.out.println("✅ User updated!");
+                    // Update multiple users
+                    System.out.print("How many user accounts do you want to update? ");
+                    if (!sc.hasNextInt()) {
+                        System.out.println("❌ Invalid number.");
+                        sc.nextLine();
+                        break;
+                    }
+                    int updateCount = sc.nextInt();
+                    sc.nextLine();
+                    if (updateCount <= 0) {
+                        System.out.println("❌ Number must be at least 1.");
+                        break;
+                    }
+                    for (int i = 1; i <= updateCount; i++) {
+                        System.out.println("\n--- Update user " + i + " of " + updateCount + " ---");
+                        System.out.print("Enter User ID to update: ");
+                        if (!sc.hasNextInt()) {
+                            System.out.println("❌ Invalid ID. Skipping this entry.");
+                            sc.nextLine();
+                            continue;
+                        }
+                        int uid = sc.nextInt();
+                        sc.nextLine();
+
+                        // Optional: verify user exists
+                        String checkUser = "SELECT 1 FROM user_table WHERE u_id = ?";
+                        if (!con.recordExists(checkUser, uid)) {
+                            System.out.println("⚠️ User ID " + uid + " not found. Skipping.");
+                            continue;
+                        }
+
+                        System.out.print("Enter new name: ");
+                        String newName = sc.nextLine().trim();
+                        System.out.print("Enter new email: ");
+                        String newEmail = sc.nextLine().trim();
+                        System.out.print("Enter new role (Admin/Customer): ");
+                        String newRole = sc.nextLine().trim();
+
+                        // basic validation for role
+                        if (!newRole.equalsIgnoreCase("Admin") && !newRole.equalsIgnoreCase("Customer")) {
+                            System.out.println("❌ Invalid role. Use 'Admin' or 'Customer'. Update skipped for this user.");
+                            continue;
+                        }
+
+                        String sqlUpdateUser = "UPDATE user_table SET u_name = ?, u_email = ?, u_role = ? WHERE u_id = ?";
+                        con.updateRecord(sqlUpdateUser, newName, newEmail, newRole, uid);
+                        System.out.println("✅ User " + uid + " updated!");
+                    }
                     break;
 
                 case 4:
-                    System.out.print("Enter User ID to delete: ");
-                    int del = sc.nextInt();
-                    String sqlDel = "DELETE FROM user_table WHERE u_id = ?";
-                    con.updateRecord(sqlDel, del);
-                    System.out.println("🗑️ User deleted!");
+                    // Delete multiple users
+                    System.out.print("How many user accounts do you want to delete? ");
+                    if (!sc.hasNextInt()) {
+                        System.out.println("❌ Invalid number.");
+                        sc.nextLine();
+                        break;
+                    }
+                    int deleteCount = sc.nextInt();
+                    sc.nextLine();
+                    if (deleteCount <= 0) {
+                        System.out.println("❌ Number must be at least 1.");
+                        break;
+                    }
+                    for (int i = 1; i <= deleteCount; i++) {
+                        System.out.println("\n--- Delete user " + i + " of " + deleteCount + " ---");
+                        System.out.print("Enter User ID to delete: ");
+                        if (!sc.hasNextInt()) {
+                            System.out.println("❌ Invalid ID. Skipping this entry.");
+                            sc.nextLine();
+                            continue;
+                        }
+                        int del = sc.nextInt();
+                        sc.nextLine();
+
+                        // verify user exists
+                        String checkUserDel = "SELECT 1 FROM user_table WHERE u_id = ?";
+                        if (!con.recordExists(checkUserDel, del)) {
+                            System.out.println("⚠️ User ID " + del + " not found. Skipping.");
+                            continue;
+                        }
+
+                        System.out.print("Are you sure you want to delete user ID " + del + "? (1-Yes, 0-No): ");
+                        if (!sc.hasNextInt()) {
+                            System.out.println("❌ Invalid input. Skipping deletion.");
+                            sc.nextLine();
+                            continue;
+                        }
+                        int confirmUser = sc.nextInt();
+                        sc.nextLine();
+                        while (confirmUser != 1 && confirmUser != 0) {
+                            System.out.print("Invalid input. Enter 1 for Yes or 0 for No: ");
+                            if (!sc.hasNextInt()) {
+                                sc.nextLine();
+                                confirmUser = 0;
+                                break;
+                            }
+                            confirmUser = sc.nextInt();
+                            sc.nextLine();
+                        }
+                        if (confirmUser == 1) {
+                            String sqlDel = "DELETE FROM user_table WHERE u_id = ?";
+                            con.updateRecord(sqlDel, del);
+                            System.out.println("🗑️ User " + del + " deleted!");
+                        } else {
+                            System.out.println("❌ User deletion canceled for ID " + del + ".");
+                        }
+                    }
                     break;
 
                 case 5:
-                    String view = "SELECT * FROM tbl_booking";
+                    String view = "SELECT b.b_id, b.u_id, m.movie_name, m.showtime, b.seat_no, b.booking_fee "
+                            + "FROM tbl_booking b "
+                            + "JOIN tbl_movies m ON b.m_id = m.m_id";
                     String[] headers2 = {"Booking ID", "User ID", "Movie", "Showtime", "Seat", "Fee"};
                     String[] cols2 = {"b_id", "u_id", "movie_name", "showtime", "seat_no", "booking_fee"};
                     con.viewRecords(view, headers2, cols2);
                     break;
 
                 case 6:
-                    System.out.println("Enter Book ID to delete: ");
-                    int dele = sc.nextInt();
-                    sqlDel = "DELETE FROM tbl_booking WHERE b_id = ?";
-                    con.updateRecord(sqlDel, dele);
-                    System.out.println("🗑️ Book ID deleted!");
+                    // Delete multiple bookings
+                    System.out.print("How many bookings do you want to delete? ");
+                    if (!sc.hasNextInt()) {
+                        System.out.println("❌ Invalid number.");
+                        sc.nextLine();
+                        break;
+                    }
+                    int delBookCount = sc.nextInt();
+                    sc.nextLine();
+                    if (delBookCount <= 0) {
+                        System.out.println("❌ Number must be at least 1.");
+                        break;
+                    }
+                    for (int i = 1; i <= delBookCount; i++) {
+                        System.out.println("\n--- Delete booking " + i + " of " + delBookCount + " ---");
+                        System.out.print("Enter Booking ID to delete: ");
+                        if (!sc.hasNextInt()) {
+                            System.out.println("❌ Invalid ID. Skipping this entry.");
+                            sc.nextLine();
+                            continue;
+                        }
+                        int dele = sc.nextInt();
+                        sc.nextLine();
+
+                        // verify booking exists
+                        String checkBooking = "SELECT 1 FROM tbl_booking WHERE b_id = ?";
+                        if (!con.recordExists(checkBooking, dele)) {
+                            System.out.println("⚠️ Booking ID " + dele + " not found. Skipping.");
+                            continue;
+                        }
+
+                        System.out.print("Are you sure you want to delete booking ID " + dele + "? (1-Yes, 0-No): ");
+                        if (!sc.hasNextInt()) {
+                            System.out.println("❌ Invalid input. Skipping deletion.");
+                            sc.nextLine();
+                            continue;
+                        }
+                        int confirmBook = sc.nextInt();
+                        sc.nextLine();
+                        while (confirmBook != 1 && confirmBook != 0) {
+                            System.out.print("Invalid input. Enter 1 for Yes or 0 for No: ");
+                            if (!sc.hasNextInt()) {
+                                sc.nextLine();
+                                confirmBook = 0;
+                                break;
+                            }
+                            confirmBook = sc.nextInt();
+                            sc.nextLine();
+                        }
+                        if (confirmBook == 1) {
+                            String getBookingInfo = "SELECT movie_name, showtime FROM tbl_booking WHERE b_id = ?";
+                            List<Map<String, Object>> bookingInfo = con.fetchRecords(getBookingInfo, dele);
+
+                            if (!bookingInfo.isEmpty()) {
+                                Map<String, Object> info = bookingInfo.get(0);
+                                String movieName = info.get("movie_name").toString();
+                                String showtime = info.get("showtime").toString();
+
+                                String restoreSeat = "UPDATE tbl_movies SET available_seats = available_seats + 1 WHERE movie_name = ? AND showtime = ?";
+                                con.updateRecord(restoreSeat, movieName, showtime);
+                            }
+
+                            String sqlDelBooking = "DELETE FROM tbl_booking WHERE b_id = ?";
+                            con.updateRecord(sqlDelBooking, dele);
+
+                            System.out.println("🗑️ Booking " + dele + " deleted! Seat restored ✅");
+                        }
+                    }
                     break;
 
                 case 7:
@@ -173,6 +341,10 @@ public class main {
                     break;
 
                 case 8:
+                    manageTransactions();
+                    break;
+
+                case 9:
                     return;
 
                 default:
@@ -181,233 +353,381 @@ public class main {
         }
     }
 
-    // MANAGE MOVIES OF THE MONTH
-// MANAGE MOVIES OF THE MONTH
-public static void manageMovies() {
-    while (true) {
-        System.out.println("\n--- MANAGE MOVIES ---");
-        System.out.println("1. View All Movies");
-        System.out.println("2. Add New Movie");
-        System.out.println("3. Update Movie");
-        System.out.println("4. Delete Movie");
-        System.out.println("5. Go Back");
-        System.out.print("Enter choice (1-5): ");
-        int ch = sc.nextInt();
-        sc.nextLine();
+    // MANAGE MOVIES
+    public static void manageMovies() {
+        while (true) {
+            System.out.println("\n--- MANAGE MOVIES ---");
+            System.out.println("1. View All Movies");
+            System.out.println("2. Add New Movie(s)");
+            System.out.println("3. Update Movie(s)");
+            System.out.println("4. Delete Movie(s)");
+            System.out.println("5. Go Back");
+            System.out.print("Enter choice (1-5): ");
+            int ch = sc.nextInt();
+            sc.nextLine();
 
-        switch (ch) {
-            case 1:
-                System.out.println("Connection Successful");
-                String sqlView = "SELECT * FROM tbl_movies";
-                String[] headers = {"Movie ID", "Movie Name", "Genre", "Showtime", "Available Seats"};
-                String[] cols = {"m_id", "movie_name", "genre", "showtime", "available_seats"};
-                con.viewRecords(sqlView, headers, cols);
-                break;
+            switch (ch) {
+                case 1:
+                    String sqlView = "SELECT * FROM tbl_movies";
+                    String[] headers = {"Movie ID", "Movie Name", "Genre", "Run Time", "Show Date (MM/DD/YYYY)", "Available Seats"};
+                    String[] cols = {"m_id", "movie_name", "genre", "run_time", "showtime", "available_seats"};
+                    con.viewRecords(sqlView, headers, cols);
+                    break;
 
-            case 2:
-                System.out.println("Connection Successful");
-                System.out.print("Enter Movie Name: ");
-                String movieName = sc.nextLine();
+                case 2: // ✅ Add Multiple Movies
+                    System.out.print("How many movies do you want to add? ");
+                    int addCount = sc.nextInt();
+                    sc.nextLine();
 
-                System.out.print("Enter Genre: ");
-                String genre = sc.nextLine();
+                    for (int i = 0; i < addCount; i++) {
+                        System.out.println("\n--- Add Movie #" + (i + 1) + " ---");
+                        System.out.print("Enter Movie Name: ");
+                        String movieName = sc.nextLine();
+                        System.out.print("Enter Genre: ");
+                        String genre = sc.nextLine();
+                        System.out.print("Enter Run Time (e.g., 2hr 15min): ");
+                        String runTime = sc.nextLine();
+                        System.out.print("Enter Show Date (MM/DD/YYYY): ");
+                        String showDate = sc.nextLine();
 
-                System.out.print("Enter Showtime (e.g., 2hr): ");
-                String showtime = sc.nextLine();
+                        int seats = 50; // default seats
+                        String sqlInsert = "INSERT INTO tbl_movies (movie_name, genre, run_time, showtime, available_seats) VALUES (?, ?, ?, ?, ?)";
+                        con.updateRecord(sqlInsert, movieName, genre, runTime, showDate, seats);
+                        System.out.println("🎬 Movie \"" + movieName + "\" added successfully with 50 seats!");
+                    }
+                    System.out.println("\n✅ All movies added successfully!");
+                    break;
 
-                int seats = 50; // default
-                String sqlInsert = "INSERT INTO tbl_movies (movie_name, genre, showtime, available_seats) VALUES (?, ?, ?, ?)";
-                con.updateRecord(sqlInsert, movieName, genre, showtime, seats);
-                System.out.println("🎬 Movie added successfully with 50 available seats!");
-                break;
+                case 3: // ✏️ Update Multiple Movies
+                    System.out.print("How many movies do you want to update? ");
+                    int updateCount = sc.nextInt();
+                    sc.nextLine();
 
-            case 3:
-                System.out.print("Enter Movie ID to Update: ");
-                int mid = sc.nextInt();
-                sc.nextLine();
+                    for (int i = 0; i < updateCount; i++) {
+                        System.out.println("\n--- Update Movie #" + (i + 1) + " ---");
+                        System.out.print("Enter Movie ID to Update: ");
+                        int mid = sc.nextInt();
+                        sc.nextLine();
 
-                System.out.print("Enter New Movie Name: ");
-                String newName = sc.nextLine();
+                        // Confirm movie exists
+                        String checkMovie = "SELECT * FROM tbl_movies WHERE m_id = ?";
+                        if (con.recordExists(checkMovie, mid)) {
+                            System.out.print("Enter New Movie Name: ");
+                            String newName = sc.nextLine();
+                            System.out.print("Enter New Genre: ");
+                            String newGenre = sc.nextLine();
+                            System.out.print("Enter New Run Time (e.g., 2hr 15min): ");
+                            String newRunTime = sc.nextLine();
+                            System.out.print("Enter New Show Date (MM/DD/YYYY): ");
+                            String newShowDate = sc.nextLine();
+                            System.out.print("Enter New Available Seats: ");
+                            int newSeats = sc.nextInt();
+                            sc.nextLine();
 
-                System.out.print("Enter New Genre: ");
-                String newGenre = sc.nextLine();
+                            String sqlUpdate = "UPDATE tbl_movies SET movie_name = ?, genre = ?, run_time = ?, showtime = ?, available_seats = ? WHERE m_id = ?";
+                            con.updateRecord(sqlUpdate, newName, newGenre, newRunTime, newShowDate, newSeats, mid);
+                            System.out.println("✅ Movie ID " + mid + " updated successfully!");
+                        } else {
+                            System.out.println("⚠️ Movie ID " + mid + " not found! Skipping...");
+                        }
+                    }
+                    System.out.println("\n✅ Movie updates completed!");
+                    break;
 
-                System.out.print("Enter New Showtime: ");
-                String newShowtime = sc.nextLine();
+                case 4: // 🗑️ Delete Multiple Movies
+                    System.out.print("How many movies do you want to delete? ");
+                    int deleteCount = sc.nextInt();
+                    sc.nextLine();
 
-                System.out.print("Enter New Available Seats: ");
-                int newSeats = sc.nextInt();
+                    for (int i = 0; i < deleteCount; i++) {
+                        System.out.println("\n--- Delete Movie #" + (i + 1) + " ---");
+                        System.out.print("Enter Movie ID to Delete: ");
+                        int del = sc.nextInt();
+                        sc.nextLine();
 
-                String sqlUpdate = "UPDATE tbl_movies SET movie_name = ?, genre = ?, showtime = ?, available_seats = ? WHERE m_id = ?";
-                con.updateRecord(sqlUpdate, newName, newGenre, newShowtime, newSeats, mid);
-                System.out.println("✅ Movie updated successfully!");
-                break;
+                        String checkMovie = "SELECT * FROM tbl_movies WHERE m_id = ?";
+                        if (!con.recordExists(checkMovie, del)) {
+                            System.out.println("⚠️ Movie ID " + del + " not found! Skipping...");
+                            continue;
+                        }
 
-            case 4:
-                System.out.print("Enter Movie ID to Delete: ");
-                int del = sc.nextInt();
+                        System.out.print("Are you sure you want to delete this movie? (1-Yes, 0-No): ");
+                        int confirmMovie = sc.nextInt();
+                        sc.nextLine();
 
-                String sqlDel = "DELETE FROM tbl_movies WHERE m_id = ?";
-                con.updateRecord(sqlDel, del);
-                System.out.println("🗑️ Movie deleted successfully!");
-                break;
+                        while (confirmMovie != 1 && confirmMovie != 0) {
+                            System.out.print("Invalid input. Enter 1 for Yes or 0 for No: ");
+                            confirmMovie = sc.nextInt();
+                            sc.nextLine();
+                        }
 
-            case 5:
-                return;
+                        if (confirmMovie == 1) {
+                            String sqlDel = "DELETE FROM tbl_movies WHERE m_id = ?";
+                            con.updateRecord(sqlDel, del);
+                            System.out.println("🗑️ Movie ID " + del + " deleted!");
+                        } else {
+                            System.out.println("❌ Movie deletion canceled for ID " + del);
+                        }
+                    }
+                    System.out.println("\n✅ Bulk deletion completed!");
+                    break;
 
-            default:
-                System.out.println("Invalid choice!");
+                case 5:
+                    return;
+
+                default:
+                    System.out.println("Invalid choice!");
+            }
         }
     }
-}
 
+    // Manage Transactions
+    public static void manageTransactions() {
+        while (true) {
+            System.out.println("\n--- MANAGE TRANSACTIONS ---");
+            System.out.println("1. View All Transactions");
+            System.out.println("2. Update Transaction Payment");
+            System.out.println("3. Go Back");
+            System.out.print("Enter choice (1-3): ");
+            int ch = sc.nextInt();
+            sc.nextLine();
+
+            switch (ch) {
+                case 1:
+                    String viewTrans
+                            = "SELECT t.t_id, t.b_id, u.u_name, m.movie_name, m.showtime, "
+                            + "b.seat_no, t.booking_fee, t.payment_status, t.payment_date "
+                            + "FROM tbl_transaction t "
+                            + "JOIN tbl_booking b ON t.b_id = b.b_id "
+                            + "JOIN user_table u ON b.u_id = u.u_id "
+                            + "JOIN tbl_movies m ON b.m_id = m.m_id";
+
+                    String[] headers1 = {"T_ID", "Booking ID", "Customer", "Movie", "Showtime", "Seat", "Fee", "Status", "Date"};
+                    String[] cols1 = {"t_id", "b_id", "u_name", "movie_name", "showtime", "seat_no", "booking_fee", "payment_status", "payment_date"};
+                    con.viewRecords(viewTrans, headers1, cols1);
+                    break;
+
+                case 2:
+                    System.out.print("Enter Transaction ID to update: ");
+                    int tid = sc.nextInt();
+                    sc.nextLine();
+
+                    System.out.println("Select new payment status:");
+                    System.out.println("1. Paid");
+                    System.out.println("2. Not Yet Paid");
+                    System.out.print("Enter choice (1-2): ");
+                    int psChoice = sc.nextInt();
+                    sc.nextLine();
+
+                    String newStatus = (psChoice == 1) ? "Paid" : "Not Yet Paid";
+
+                    String sqlUpdate = "UPDATE tbl_transaction SET payment_status = ? WHERE t_id = ?";
+                    con.updateRecord(sqlUpdate, newStatus, tid);
+                    System.out.println("✅ Payment status updated successfully!");
+                    break;
+
+                case 3:
+                    return;
+
+                default:
+                    System.out.println("Invalid choice!");
+            }
+        }
+    }
 
     // Customer Menu 
-public static void customerMenu(Map<String, Object> user) {
-    int userId = Integer.parseInt(user.get("u_id").toString());
-    while (true) {
-        System.out.println("\n--- CUSTOMER MENU ---");
-        System.out.println("1. View Available Movies");
-        System.out.println("2. Book Ticket");
-        System.out.println("3. View My Bookings");
-        System.out.println("4. Cancel Ticket");
-        System.out.println("5. Logout");
-        System.out.print("Enter choice (1-5): ");
-        int ch = sc.nextInt();
+    public static void customerMenu(Map<String, Object> user) {
+        int userId = Integer.parseInt(user.get("u_id").toString());
+        while (true) {
+            System.out.println("\n--- CUSTOMER MENU ---");
+            System.out.println("1. View Available Movies");
+            System.out.println("2. Book Ticket");
+            System.out.println("3. View My Bookings");
+            System.out.println("4. Cancel Ticket");
+            System.out.println("5. View Canceled Tickets");
+            System.out.println("6. Logout");
+            System.out.print("Enter choice (1-6): ");
 
-        switch (ch) {
-            case 1:
-                String sqlMovies = "SELECT * FROM tbl_movies";
-                String[] headers = {"Movie ID", "Movie Name", "Genre", "Showtime", "Available Seats"};
-                String[] cols = {"m_id", "movie_name", "genre", "showtime", "available_seats"};
-                con.viewRecords(sqlMovies, headers, cols);
-                break;
+            int ch = sc.nextInt();
 
-            case 2:
-                // Show available movies
-                String sqlMoviesList = "SELECT * FROM tbl_movies";
-                String[] movieHeaders = {"Movie ID", "Movie Name", "Genre", "Showtime", "Available Seats"};
-                String[] movieCols = {"m_id", "movie_name", "genre", "showtime", "available_seats"};
-                con.viewRecords(sqlMoviesList, movieHeaders, movieCols);
-
-                // Select movie by ID
-                System.out.print("Enter Movie ID to Book: ");
-                int movieId = sc.nextInt();
-
-                // Fetch movie details
-                String getMovie = "SELECT * FROM tbl_movies WHERE m_id = ?";
-                List<Map<String, Object>> movieData = con.fetchRecords(getMovie, movieId);
-                if (movieData.isEmpty()) {
-                    System.out.println("❌ Invalid Movie ID!");
+            switch (ch) {
+                case 1:
+                    String sqlMovies = "SELECT * FROM tbl_movies";
+                    String[] headers = {"Movie ID", "Movie Name", "Genre", "Run Time", "Showtime", "Available Seats"};
+                    String[] cols = {"m_id", "movie_name", "genre", "run_time", "showtime", "available_seats"};
+                    con.viewRecords(sqlMovies, headers, cols);
                     break;
-                }
 
-                Map<String, Object> selectedMovie = movieData.get(0);
-                String movieName = selectedMovie.get("movie_name").toString();
-                String showtime = selectedMovie.get("showtime").toString();
-                // handle possible null available_seats safely
-                int availableSeats = 0;
-                Object avObj = selectedMovie.get("available_seats");
-                if (avObj != null) {
-                    availableSeats = Integer.parseInt(avObj.toString());
-                }
+                case 2:
+                    // View movies before booking
+                    String sqlMoviesList = "SELECT * FROM tbl_movies";
+                    String[] movieHeaders = {"Movie ID", "Movie Name", "Genre", "Run Time", "Showtime", "Available Seats"};
+                    String[] movieCols = {"m_id", "movie_name", "genre", "run_time", "showtime", "available_seats"};
+                    con.viewRecords(sqlMoviesList, movieHeaders, movieCols);
 
-                System.out.println("🎬 " + movieName + " | Showtime: " + showtime);
-                System.out.println("Available seats: " + availableSeats);
+                    System.out.print("Enter Movie ID to Book: ");
+                    int movieId = sc.nextInt();
 
-                // Input number of tickets
-                System.out.print("How many tickets would you like to book? ");
-                int ticketCount = sc.nextInt();
-
-                if (ticketCount > availableSeats) {
-                    System.out.println("❌ Not enough seats available!");
-                    break;
-                }
-
-                double ticketPrice = 150.0;
-                double totalFee = ticketPrice * ticketCount;
-                System.out.println("💰 Your booking fee is ₱" + ticketPrice + " × " + ticketCount + " = ₱" + totalFee);
-
-                // Pick seats (ensure seat uniqueness)
-                StringBuilder seatsBooked = new StringBuilder();
-                for (int i = 1; i <= ticketCount; i++) {
-                    System.out.print("Enter seat number #" + i + ": ");
-                    String seatNo = sc.next();
-
-                    // Check if seat is already booked for this movie & showtime and not canceled
-                    String checkSeat = "SELECT * FROM tbl_booking WHERE movie_name = ? AND showtime = ? AND seat_no = ? AND canceled = 0";
-                    List<Map<String, Object>> existingSeat = con.fetchRecords(checkSeat, movieName, showtime, seatNo);
-
-                    if (!existingSeat.isEmpty()) {
-                        System.out.println("❌ Seat " + seatNo + " is already taken! Try another seat.");
-                        i--;
-                        continue;
+                    String getMovie = "SELECT * FROM tbl_movies WHERE m_id = ?";
+                    List<Map<String, Object>> movieData = con.fetchRecords(getMovie, movieId);
+                    if (movieData == null || movieData.isEmpty()) {
+                        System.out.println("❌ Invalid Movie ID!");
+                        break;
                     }
 
-                    // Add booking per seat — store booking_fee as ticketPrice (per seat)
-                    String sqlBook = "INSERT INTO tbl_booking(u_id, movie_name, showtime, seat_no, booking_fee, canceled) VALUES (?, ?, ?, ?, ?, 0)";
-                    con.addRecord(sqlBook, userId, movieName, showtime, seatNo, ticketPrice);
-                    seatsBooked.append(seatNo).append(" ");
-                }
+                    Map<String, Object> selectedMovie = movieData.get(0);
+                    String movieName = selectedMovie.get("movie_name").toString();
+                    String showtime = selectedMovie.get("showtime").toString();
+                    String runTime = selectedMovie.get("run_time") != null ? selectedMovie.get("run_time").toString() : "N/A";
+                    int availableSeats = Integer.parseInt(selectedMovie.get("available_seats").toString());
 
-                // Reduce available seats in tbl_movies
-                String updateSeats = "UPDATE tbl_movies SET available_seats = available_seats - ? WHERE m_id = ?";
-                con.updateRecord(updateSeats, ticketCount, movieId);
+                    System.out.println("🎬 " + movieName + " | Duration: " + runTime + " | Showtime: " + showtime);
+                    System.out.println("Available seats: " + availableSeats);
 
-                System.out.println("🎟️ Successfully booked " + ticketCount + " ticket(s) for " + movieName + "!");
-                System.out.println("🪑 Seats: " + seatsBooked.toString().trim());
-                System.out.println("💸 Total Fee: ₱" + totalFee);
-                break;
+                    System.out.print("How many tickets would you like to book? ");
+                    int ticketCount = sc.nextInt();
 
-            case 3:
-                String view = "SELECT * FROM tbl_booking WHERE u_id = " + userId;
-                String[] headers2 = {"Booking ID", "Movie", "Showtime", "Seat", "Fee", "Canceled"};
-                String[] cols2 = {"b_id", "movie_name", "showtime", "seat_no", "booking_fee", "canceled"};
-                con.viewRecords(view, headers2, cols2);
-                break;
+                    if (ticketCount > availableSeats || ticketCount <= 0) {
+                        System.out.println("❌ Invalid number of tickets!");
+                        break;
+                    }
 
-            case 4:
-                System.out.print("Enter Booking ID to Cancel: ");
-                int cancelId = sc.nextInt();
+                    double ticketPrice = 150.0;
+                    double totalFee = ticketPrice * ticketCount;
+                    StringBuilder seatsBooked = new StringBuilder();
 
-                // Fetch the booking to ensure it belongs to user and is not already canceled
-                String fetchBooking = "SELECT * FROM tbl_booking WHERE b_id = ? AND u_id = ?";
-                List<Map<String, Object>> bookingData = con.fetchRecords(fetchBooking, cancelId, userId);
-                if (bookingData.isEmpty()) {
-                    System.out.println("❌ Booking not found or does not belong to you.");
+                    // Loop for multiple seats
+                    for (int i = 1; i <= ticketCount; i++) {
+                        System.out.print("Enter seat number #" + i + ": ");
+                        String seatNo = sc.next();
+
+                        // Check if seat taken
+                        String checkSeat = "SELECT * FROM tbl_booking WHERE m_id = ? AND seat_no = ? AND canceled = 0";
+                        List<Map<String, Object>> existingSeat = con.fetchRecords(checkSeat, movieId, seatNo);
+                        if (existingSeat != null && !existingSeat.isEmpty()) {
+                            System.out.println("❌ Seat " + seatNo + " is already taken!");
+                            i--;
+                            continue;
+                        }
+
+                        // Add booking
+                        String sqlBook = "INSERT INTO tbl_booking(u_id, m_id, seat_no, booking_fee, canceled) VALUES (?, ?, ?, ?, 0)";
+                        con.addRecord(sqlBook, userId, movieId, seatNo, ticketPrice);
+
+                        // Get the latest booking ID for this seat
+                        String getBId = "SELECT b_id FROM tbl_booking ORDER BY b_id DESC LIMIT 1";
+                        List<Map<String, Object>> bResult = con.fetchRecords(getBId);
+                        int bId = Integer.parseInt(bResult.get(0).get("b_id").toString());
+
+                        // Create transaction with default status “Not Yet Paid”
+                        String insertTrans = "INSERT INTO tbl_transaction (b_id, booking_fee, payment_status, payment_date) VALUES (?, ?, ?, ?)";
+                        String dateNow = java.time.LocalDateTime.now().toString();
+                        con.addRecord(insertTrans, bId, ticketPrice, "Not Yet Paid", dateNow);
+
+                        seatsBooked.append(seatNo).append(" ");
+                    }
+
+                    // Update available seats
+                    String updateSeats = "UPDATE tbl_movies SET available_seats = available_seats - ? WHERE m_id = ?";
+                    con.updateRecord(updateSeats, ticketCount, movieId);
+
+                    // Print booking receipt
+                    System.out.println("\n--- 🎫 BOOKING RECEIPT ---");
+                    System.out.println("Customer: " + user.get("u_name"));
+                    System.out.println("Movie: " + movieName);
+                    System.out.println("Duration: " + runTime);
+                    System.out.println("Showtime: " + showtime);
+                    System.out.println("Seats: " + seatsBooked.toString().trim());
+                    System.out.println("Total Fee: ₱" + totalFee);
+                    System.out.println("Payment Status: NOT YET PAID");
+                    System.out.println("------------------------------");
+                    System.out.println("📅 Date: " + java.time.LocalDate.now());
+                    System.out.println("Thank you for booking with us!\n");
                     break;
-                }
 
-                Map<String, Object> booking = bookingData.get(0);
-                Object canceledObj = booking.get("canceled");
-                int isCanceled = 0;
-                if (canceledObj != null) isCanceled = Integer.parseInt(canceledObj.toString());
-                if (isCanceled == 1) {
-                    System.out.println("❌ Booking is already canceled.");
+                case 3:
+                    System.out.println("\n--- 🎟️ MY ACTIVE BOOKINGS ---");
+                    String myActiveSql = ""
+                            + "SELECT b.b_id, m.movie_name, m.showtime, b.seat_no, t.payment_status, b.booking_fee "
+                            + "FROM tbl_booking b "
+                            + "JOIN tbl_movies m ON b.m_id = m.m_id "
+                            + "LEFT JOIN tbl_transaction t ON b.b_id = t.b_id "
+                            + "WHERE b.u_id = ? AND b.canceled = 0";
+                    List<Map<String, Object>> activeBookings = con.fetchRecords(myActiveSql, userId);
+
+                    if (activeBookings == null || activeBookings.isEmpty()) {
+                        System.out.println("You have no active tickets.");
+                        break;
+                    }
+
+                    System.out.printf("%-10s %-20s %-15s %-10s %-10s %-15s\n",
+                            "Book ID", "Movie", "Showtime", "Seat", "Fee", "Status");
+                    for (Map<String, Object> b : activeBookings) {
+                        System.out.printf("%-10s %-20s %-15s %-10s %-10s %-15s\n",
+                                b.get("b_id"), b.get("movie_name"), b.get("showtime"),
+                                b.get("seat_no"), b.get("booking_fee"),
+                                (b.get("payment_status") == null ? "Not Yet Paid" : b.get("payment_status")));
+                    }
                     break;
-                }
 
-                String bookedMovie = booking.get("movie_name").toString();
-                String bookedShowtime = booking.get("showtime").toString();
+                case 4:
+                    System.out.print("Enter Booking ID to Cancel: ");
+                    int cancelId = sc.nextInt();
 
-                // Mark booking as canceled (use 1 for true in SQLite)
-                String cancelSQL = "UPDATE tbl_booking SET canceled = 1 WHERE b_id = ? AND u_id = ?";
-                con.updateRecord(cancelSQL, cancelId, userId);
+                    String fetchBooking = "SELECT * FROM tbl_booking WHERE b_id = ? AND u_id = ?";
+                    List<Map<String, Object>> bookingData = con.fetchRecords(fetchBooking, cancelId, userId);
+                    if (bookingData == null || bookingData.isEmpty()) {
+                        System.out.println("❌ Booking not found or does not belong to you.");
+                        break;
+                    }
 
-                // Return the seat to available pool (increase available_seats by 1)
-                String restoreSeatSql = "UPDATE tbl_movies SET available_seats = available_seats + 1 WHERE movie_name = ? AND showtime = ?";
-                con.updateRecord(restoreSeatSql, bookedMovie, bookedShowtime);
+                    Map<String, Object> booking = bookingData.get(0);
+                    int bookedMId = Integer.parseInt(booking.get("m_id").toString());
+                    int isCanceled = Integer.parseInt(booking.get("canceled").toString());
+                    if (isCanceled == 1) {
+                        System.out.println("❌ Booking already canceled.");
+                        break;
+                    }
 
-                System.out.println("🛑 Ticket canceled! Note: Booking fee is non-refundable.");
-                break;
+                    // Cancel booking
+                    String cancelSQL = "UPDATE tbl_booking SET canceled = 1 WHERE b_id = ?";
+                    con.updateRecord(cancelSQL, cancelId);
 
-            case 5:
-                return;
+                    // Restore seat
+                    String restoreSeatSql = "UPDATE tbl_movies SET available_seats = available_seats + 1 WHERE m_id = ?";
+                    con.updateRecord(restoreSeatSql, bookedMId);
 
-            default:
-                System.out.println("Invalid choice!");
+                    System.out.println("🛑 Ticket canceled! Seat restored.");
+                    break;
+
+                case 5:
+                    System.out.println("\n--- ❌ CANCELED TICKETS ---");
+                    String canceledSql = ""
+                            + "SELECT b.b_id, m.movie_name, m.showtime, b.seat_no, b.booking_fee "
+                            + "FROM tbl_booking b "
+                            + "JOIN tbl_movies m ON b.m_id = m.m_id "
+                            + "WHERE b.u_id = ? AND b.canceled = 1";
+                    List<Map<String, Object>> canceledBookings = con.fetchRecords(canceledSql, userId);
+
+                    if (canceledBookings == null || canceledBookings.isEmpty()) {
+                        System.out.println("You have no canceled tickets.");
+                        break;
+                    }
+
+                    System.out.printf("%-10s %-20s %-20s %-10s %-10s\n", "Book ID", "Movie", "Showtime", "Seat", "Fee");
+                    for (Map<String, Object> b : canceledBookings) {
+                        System.out.printf("%-10s %-20s %-20s %-10s %-10s\n",
+                                b.get("b_id"), b.get("movie_name"), b.get("showtime"), b.get("seat_no"), b.get("booking_fee"));
+                    }
+                    break;
+
+                case 6:
+                    return;
+
+                default:
+                    System.out.println("Invalid choice!");
+            }
         }
     }
-}
 
 }

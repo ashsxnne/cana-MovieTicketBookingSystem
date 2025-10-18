@@ -245,5 +245,22 @@ public static String hashPassword(String password) {
     }
 }
 
+public boolean recordExists(String sql, Object... params) {
+    try (Connection conn = this.connectDB();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+        for (int i = 0; i < params.length; i++) {
+            pstmt.setObject(i + 1, params[i]);
+        }
+
+        try (ResultSet rs = pstmt.executeQuery()) {
+            return rs.next();
+        }
+    } catch (SQLException e) {
+        System.out.println("Error checking record existence: " + e.getMessage());
+        return false;
+    }
+}
+
 }
 
