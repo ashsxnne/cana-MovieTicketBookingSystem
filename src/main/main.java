@@ -100,6 +100,14 @@ public class main {
         }
     }
 
+    public static void viewAllUsers() {
+        String sql = "SELECT * FROM user_table";
+        String[] headers = {"ID", "Name", "Email", "Role", "Status"};
+        String[] columns = {"u_id", "u_name", "u_email", "u_role", "u_status"};
+
+        con.viewRecords(sql, headers, columns);
+    }
+
     // Admin Menu 
     public static void adminMenu() {
         while (true) {
@@ -125,13 +133,16 @@ public class main {
 
             switch (ch) {
                 case 1:
-                    String sql1 = "SELECT * FROM user_table";
-                    String[] headers1 = {"ID", "Name", "Email", "Role", "Status"};
-                    String[] cols1 = {"u_id", "u_name", "u_email", "u_role", "u_status"};
-                    con.viewRecords(sql1, headers1, cols1);
+                    viewAllUsers();
                     break;
+//                    String sql1 = "SELECT * FROM user_table";
+//                    String[] headers1 = {"ID", "Name", "Email", "Role", "Status"};
+//                    String[] cols1 = {"u_id", "u_name", "u_email", "u_role", "u_status"};
+//                    con.viewRecords(sql1, headers1, cols1);
+//                    break;
 
                 case 2:
+                    viewAllUsers();
                     System.out.print("Enter User ID to approve: ");
                     if (!sc.hasNextInt()) {
                         System.out.println("❌ Invalid ID.");
@@ -146,6 +157,7 @@ public class main {
                     break;
 
                 case 3:
+                    viewAllUsers();
                     // Update multiple users
                     System.out.print("How many user accounts do you want to update? ");
                     if (!sc.hasNextInt()) {
@@ -353,6 +365,14 @@ public class main {
         }
     }
 
+    public static void viewMovies() {
+        String sqlView = "SELECT * FROM tbl_movies";
+        String[] headers = {"Movie ID", "Movie Name", "Genre", "Run Time", "Show Date (MM/DD/YYYY)", "Available Seats"};
+        String[] columns = {"m_id", "movie_name", "genre", "run_time", "showtime", "available_seats"};
+
+        con.viewRecords(sqlView, headers, columns);
+    }
+
     // MANAGE MOVIES
     public static void manageMovies() {
         while (true) {
@@ -368,11 +388,13 @@ public class main {
 
             switch (ch) {
                 case 1:
-                    String sqlView = "SELECT * FROM tbl_movies";
-                    String[] headers = {"Movie ID", "Movie Name", "Genre", "Run Time", "Show Date (MM/DD/YYYY)", "Available Seats"};
-                    String[] cols = {"m_id", "movie_name", "genre", "run_time", "showtime", "available_seats"};
-                    con.viewRecords(sqlView, headers, cols);
+                    viewMovies();
                     break;
+//                    String sqlView = "SELECT * FROM tbl_movies";
+//                    String[] headers = {"Movie ID", "Movie Name", "Genre", "Run Time", "Show Date (MM/DD/YYYY)", "Available Seats"};
+//                    String[] cols = {"m_id", "movie_name", "genre", "run_time", "showtime", "available_seats"};
+//                    con.viewRecords(sqlView, headers, cols);
+                    
 
                 case 2: // ✅ Add Multiple Movies
                     System.out.print("How many movies do you want to add? ");
@@ -399,6 +421,7 @@ public class main {
                     break;
 
                 case 3: // ✏️ Update Multiple Movies
+                    viewMovies();
                     System.out.print("How many movies do you want to update? ");
                     int updateCount = sc.nextInt();
                     sc.nextLine();
@@ -435,6 +458,7 @@ public class main {
                     break;
 
                 case 4: // 🗑️ Delete Multiple Movies
+                    viewMovies();
                     System.out.print("How many movies do you want to delete? ");
                     int deleteCount = sc.nextInt();
                     sc.nextLine();
@@ -552,10 +576,11 @@ public class main {
 
             switch (ch) {
                 case 1:
-                    String sqlMovies = "SELECT * FROM tbl_movies";
-                    String[] headers = {"Movie ID", "Movie Name", "Genre", "Run Time", "Showtime", "Available Seats"};
-                    String[] cols = {"m_id", "movie_name", "genre", "run_time", "showtime", "available_seats"};
-                    con.viewRecords(sqlMovies, headers, cols);
+                    viewMovies();
+//                    String sqlMovies = "SELECT * FROM tbl_movies";
+//                    String[] headers = {"Movie ID", "Movie Name", "Genre", "Run Time", "Showtime", "Available Seats"};
+//                    String[] cols = {"m_id", "movie_name", "genre", "run_time", "showtime", "available_seats"};
+//                    con.viewRecords(sqlMovies, headers, cols);
                     break;
 
                 case 2:
@@ -670,7 +695,7 @@ public class main {
                     }
                     break;
 
-                case 4:
+                case 4:                    
                     System.out.print("Enter Booking ID to Cancel: ");
                     int cancelId = sc.nextInt();
 
