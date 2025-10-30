@@ -108,23 +108,19 @@ public class main {
         con.viewRecords(sql, headers, columns);
     }
 
-    // Admin Menu 
+    // Admin Menu
     public static void adminMenu() {
         while (true) {
             System.out.println("\n--- ADMIN MENU ---");
-            System.out.println("1. View All Users");
-            System.out.println("2. Approve a Customer Account");
-            System.out.println("3. Update a User Account");
-            System.out.println("4. Delete a User Account");
-            System.out.println("5. View All Bookings");
-            System.out.println("6. Delete Bookings");
-            System.out.println("7. Manage Movies of the Month");
-            System.out.println("8. Manage Transactions");
-            System.out.println("9. Logout");
-            System.out.print("Enter choice (1-9): ");
+            System.out.println("1. Manage Accounts");
+            System.out.println("2. Manage Bookings");
+            System.out.println("3. Manage Movies of the Month");
+            System.out.println("4. Manage Transactions");
+            System.out.println("5. Logout");
+            System.out.print("Enter choice (1-5): ");
 
             if (!sc.hasNextInt()) {
-                System.out.println("❌ Invalid input. Please enter a number 1-9.");
+                System.out.println("❌ Invalid input. Please enter a number 1-5.");
                 sc.nextLine();
                 continue;
             }
@@ -133,13 +129,53 @@ public class main {
 
             switch (ch) {
                 case 1:
+                    manageAccounts();
+                    break;
+
+                case 2:
+                    manageBookings();
+                    break;
+
+                case 3:
+                    manageMovies();
+                    break;
+
+                case 4:
+                    manageTransactions();
+                    break;
+
+                case 5:
+                    return;
+
+                default:
+                    System.out.println("❌ Invalid choice. Try again.");
+            }
+        }
+    }
+
+    // ------------------- MANAGE ACCOUNTS -------------------
+    public static void manageAccounts() {
+        while (true) {
+            System.out.println("\n--- MANAGE ACCOUNTS ---");
+            System.out.println("1. View All Users");
+            System.out.println("2. Approve Customer Account");
+            System.out.println("3. Update User Account");
+            System.out.println("4. Delete User Account");
+            System.out.println("5. Back to Admin Menu");
+            System.out.print("Enter choice (1-5): ");
+
+            if (!sc.hasNextInt()) {
+                System.out.println("❌ Invalid input. Please enter a number 1-5.");
+                sc.nextLine();
+                continue;
+            }
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1:
                     viewAllUsers();
                     break;
-//                    String sql1 = "SELECT * FROM user_table";
-//                    String[] headers1 = {"ID", "Name", "Email", "Role", "Status"};
-//                    String[] cols1 = {"u_id", "u_name", "u_email", "u_role", "u_status"};
-//                    con.viewRecords(sql1, headers1, cols1);
-//                    break;
 
                 case 2:
                     viewAllUsers();
@@ -158,117 +194,95 @@ public class main {
 
                 case 3:
                     viewAllUsers();
-                    // Update multiple users
-                    System.out.print("How many user accounts do you want to update? ");
+                    System.out.print("Enter User ID to update: ");
                     if (!sc.hasNextInt()) {
-                        System.out.println("❌ Invalid number.");
+                        System.out.println("❌ Invalid ID.");
                         sc.nextLine();
                         break;
                     }
-                    int updateCount = sc.nextInt();
+                    int uid = sc.nextInt();
                     sc.nextLine();
-                    if (updateCount <= 0) {
-                        System.out.println("❌ Number must be at least 1.");
+
+                    String checkUser = "SELECT 1 FROM user_table WHERE u_id = ?";
+                    if (!con.recordExists(checkUser, uid)) {
+                        System.out.println("⚠️ User not found.");
                         break;
                     }
-                    for (int i = 1; i <= updateCount; i++) {
-                        System.out.println("\n--- Update user " + i + " of " + updateCount + " ---");
-                        System.out.print("Enter User ID to update: ");
-                        if (!sc.hasNextInt()) {
-                            System.out.println("❌ Invalid ID. Skipping this entry.");
-                            sc.nextLine();
-                            continue;
-                        }
-                        int uid = sc.nextInt();
-                        sc.nextLine();
 
-                        // Optional: verify user exists
-                        String checkUser = "SELECT 1 FROM user_table WHERE u_id = ?";
-                        if (!con.recordExists(checkUser, uid)) {
-                            System.out.println("⚠️ User ID " + uid + " not found. Skipping.");
-                            continue;
-                        }
+                    System.out.print("Enter new name: ");
+                    String newName = sc.nextLine().trim();
+                    System.out.print("Enter new email: ");
+                    String newEmail = sc.nextLine().trim();
+                    System.out.print("Enter new role (Admin/Customer): ");
+                    String newRole = sc.nextLine().trim();
 
-                        System.out.print("Enter new name: ");
-                        String newName = sc.nextLine().trim();
-                        System.out.print("Enter new email: ");
-                        String newEmail = sc.nextLine().trim();
-                        System.out.print("Enter new role (Admin/Customer): ");
-                        String newRole = sc.nextLine().trim();
-
-                        // basic validation for role
-                        if (!newRole.equalsIgnoreCase("Admin") && !newRole.equalsIgnoreCase("Customer")) {
-                            System.out.println("❌ Invalid role. Use 'Admin' or 'Customer'. Update skipped for this user.");
-                            continue;
-                        }
-
-                        String sqlUpdateUser = "UPDATE user_table SET u_name = ?, u_email = ?, u_role = ? WHERE u_id = ?";
-                        con.updateRecord(sqlUpdateUser, newName, newEmail, newRole, uid);
-                        System.out.println("✅ User " + uid + " updated!");
+                    if (!newRole.equalsIgnoreCase("Admin") && !newRole.equalsIgnoreCase("Customer")) {
+                        System.out.println("❌ Invalid role. Use 'Admin' or 'Customer'.");
+                        break;
                     }
+
+                    String sqlUpdateUser = "UPDATE user_table SET u_name = ?, u_email = ?, u_role = ? WHERE u_id = ?";
+                    con.updateRecord(sqlUpdateUser, newName, newEmail, newRole, uid);
+                    System.out.println("✅ User updated!");
                     break;
 
                 case 4:
-                    // Delete multiple users
-                    System.out.print("How many user accounts do you want to delete? ");
+                    viewAllUsers();
+                    System.out.print("Enter User ID to delete: ");
                     if (!sc.hasNextInt()) {
-                        System.out.println("❌ Invalid number.");
+                        System.out.println("❌ Invalid ID.");
                         sc.nextLine();
                         break;
                     }
-                    int deleteCount = sc.nextInt();
+                    int del = sc.nextInt();
                     sc.nextLine();
-                    if (deleteCount <= 0) {
-                        System.out.println("❌ Number must be at least 1.");
+
+                    String checkUserDel = "SELECT 1 FROM user_table WHERE u_id = ?";
+                    if (!con.recordExists(checkUserDel, del)) {
+                        System.out.println("⚠️ User not found.");
                         break;
                     }
-                    for (int i = 1; i <= deleteCount; i++) {
-                        System.out.println("\n--- Delete user " + i + " of " + deleteCount + " ---");
-                        System.out.print("Enter User ID to delete: ");
-                        if (!sc.hasNextInt()) {
-                            System.out.println("❌ Invalid ID. Skipping this entry.");
-                            sc.nextLine();
-                            continue;
-                        }
-                        int del = sc.nextInt();
-                        sc.nextLine();
 
-                        // verify user exists
-                        String checkUserDel = "SELECT 1 FROM user_table WHERE u_id = ?";
-                        if (!con.recordExists(checkUserDel, del)) {
-                            System.out.println("⚠️ User ID " + del + " not found. Skipping.");
-                            continue;
-                        }
-
-                        System.out.print("Are you sure you want to delete user ID " + del + "? (1-Yes, 0-No): ");
-                        if (!sc.hasNextInt()) {
-                            System.out.println("❌ Invalid input. Skipping deletion.");
-                            sc.nextLine();
-                            continue;
-                        }
-                        int confirmUser = sc.nextInt();
-                        sc.nextLine();
-                        while (confirmUser != 1 && confirmUser != 0) {
-                            System.out.print("Invalid input. Enter 1 for Yes or 0 for No: ");
-                            if (!sc.hasNextInt()) {
-                                sc.nextLine();
-                                confirmUser = 0;
-                                break;
-                            }
-                            confirmUser = sc.nextInt();
-                            sc.nextLine();
-                        }
-                        if (confirmUser == 1) {
-                            String sqlDel = "DELETE FROM user_table WHERE u_id = ?";
-                            con.updateRecord(sqlDel, del);
-                            System.out.println("🗑️ User " + del + " deleted!");
-                        } else {
-                            System.out.println("❌ User deletion canceled for ID " + del + ".");
-                        }
+                    System.out.print("Are you sure you want to delete this user? (1-Yes, 0-No): ");
+                    int confirm = sc.nextInt();
+                    sc.nextLine();
+                    if (confirm == 1) {
+                        String sqlDel = "DELETE FROM user_table WHERE u_id = ?";
+                        con.updateRecord(sqlDel, del);
+                        System.out.println("🗑️ User deleted!");
+                    } else {
+                        System.out.println("❌ Deletion canceled.");
                     }
                     break;
 
                 case 5:
+                    return;
+
+                default:
+                    System.out.println("❌ Invalid choice.");
+            }
+        }
+    }
+
+    // ------------------- MANAGE BOOKINGS -------------------
+    public static void manageBookings() {
+        while (true) {
+            System.out.println("\n--- MANAGE BOOKINGS ---");
+            System.out.println("1. View All Bookings");
+            System.out.println("2. Delete Booking");
+            System.out.println("3. Back to Admin Menu");
+            System.out.print("Enter choice (1-3): ");
+
+            if (!sc.hasNextInt()) {
+                System.out.println("❌ Invalid input. Please enter a number 1-3.");
+                sc.nextLine();
+                continue;
+            }
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1:
                     String view = "SELECT b.b_id, b.u_id, m.movie_name, m.showtime, b.seat_no, b.booking_fee "
                             + "FROM tbl_booking b "
                             + "JOIN tbl_movies m ON b.m_id = m.m_id";
@@ -277,90 +291,39 @@ public class main {
                     con.viewRecords(view, headers2, cols2);
                     break;
 
-                case 6:
-                    // Delete multiple bookings
-                    System.out.print("How many bookings do you want to delete? ");
+                case 2:
+                    System.out.print("Enter Booking ID to delete: ");
                     if (!sc.hasNextInt()) {
-                        System.out.println("❌ Invalid number.");
+                        System.out.println("❌ Invalid ID.");
                         sc.nextLine();
                         break;
                     }
-                    int delBookCount = sc.nextInt();
+                    int bId = sc.nextInt();
                     sc.nextLine();
-                    if (delBookCount <= 0) {
-                        System.out.println("❌ Number must be at least 1.");
+
+                    String checkBooking = "SELECT 1 FROM tbl_booking WHERE b_id = ?";
+                    if (!con.recordExists(checkBooking, bId)) {
+                        System.out.println("⚠️ Booking not found.");
                         break;
                     }
-                    for (int i = 1; i <= delBookCount; i++) {
-                        System.out.println("\n--- Delete booking " + i + " of " + delBookCount + " ---");
-                        System.out.print("Enter Booking ID to delete: ");
-                        if (!sc.hasNextInt()) {
-                            System.out.println("❌ Invalid ID. Skipping this entry.");
-                            sc.nextLine();
-                            continue;
-                        }
-                        int dele = sc.nextInt();
-                        sc.nextLine();
 
-                        // verify booking exists
-                        String checkBooking = "SELECT 1 FROM tbl_booking WHERE b_id = ?";
-                        if (!con.recordExists(checkBooking, dele)) {
-                            System.out.println("⚠️ Booking ID " + dele + " not found. Skipping.");
-                            continue;
-                        }
-
-                        System.out.print("Are you sure you want to delete booking ID " + dele + "? (1-Yes, 0-No): ");
-                        if (!sc.hasNextInt()) {
-                            System.out.println("❌ Invalid input. Skipping deletion.");
-                            sc.nextLine();
-                            continue;
-                        }
-                        int confirmBook = sc.nextInt();
-                        sc.nextLine();
-                        while (confirmBook != 1 && confirmBook != 0) {
-                            System.out.print("Invalid input. Enter 1 for Yes or 0 for No: ");
-                            if (!sc.hasNextInt()) {
-                                sc.nextLine();
-                                confirmBook = 0;
-                                break;
-                            }
-                            confirmBook = sc.nextInt();
-                            sc.nextLine();
-                        }
-                        if (confirmBook == 1) {
-                            String getBookingInfo = "SELECT movie_name, showtime FROM tbl_booking WHERE b_id = ?";
-                            List<Map<String, Object>> bookingInfo = con.fetchRecords(getBookingInfo, dele);
-
-                            if (!bookingInfo.isEmpty()) {
-                                Map<String, Object> info = bookingInfo.get(0);
-                                String movieName = info.get("movie_name").toString();
-                                String showtime = info.get("showtime").toString();
-
-                                String restoreSeat = "UPDATE tbl_movies SET available_seats = available_seats + 1 WHERE movie_name = ? AND showtime = ?";
-                                con.updateRecord(restoreSeat, movieName, showtime);
-                            }
-
-                            String sqlDelBooking = "DELETE FROM tbl_booking WHERE b_id = ?";
-                            con.updateRecord(sqlDelBooking, dele);
-
-                            System.out.println("🗑️ Booking " + dele + " deleted! Seat restored ✅");
-                        }
+                    System.out.print("Are you sure you want to delete booking ID " + bId + "? (1-Yes, 0-No): ");
+                    int confirmBook = sc.nextInt();
+                    sc.nextLine();
+                    if (confirmBook == 1) {
+                        String sqlDelBooking = "DELETE FROM tbl_booking WHERE b_id = ?";
+                        con.updateRecord(sqlDelBooking, bId);
+                        System.out.println("🗑️ Booking deleted!");
+                    } else {
+                        System.out.println("❌ Deletion canceled.");
                     }
                     break;
 
-                case 7:
-                    manageMovies();
-                    break;
-
-                case 8:
-                    manageTransactions();
-                    break;
-
-                case 9:
+                case 3:
                     return;
 
                 default:
-                    System.out.println("Invalid choice!");
+                    System.out.println("❌ Invalid choice.");
             }
         }
     }
@@ -394,7 +357,6 @@ public class main {
 //                    String[] headers = {"Movie ID", "Movie Name", "Genre", "Run Time", "Show Date (MM/DD/YYYY)", "Available Seats"};
 //                    String[] cols = {"m_id", "movie_name", "genre", "run_time", "showtime", "available_seats"};
 //                    con.viewRecords(sqlView, headers, cols);
-                    
 
                 case 2: // ✅ Add Multiple Movies
                     System.out.print("How many movies do you want to add? ");
@@ -510,29 +472,70 @@ public class main {
         while (true) {
             System.out.println("\n--- MANAGE TRANSACTIONS ---");
             System.out.println("1. View All Transactions");
-            System.out.println("2. Update Transaction Payment");
-            System.out.println("3. Go Back");
-            System.out.print("Enter choice (1-3): ");
+            System.out.println("2. Update Single Transaction Payment");
+            System.out.println("3. Update All Transactions by User");
+            System.out.println("4. Go Back");
+            System.out.print("Enter choice (1-4): ");
+
+            if (!sc.hasNextInt()) {
+                System.out.println("❌ Invalid input. Please enter a number 1-4.");
+                sc.nextLine();
+                continue;
+            }
+
             int ch = sc.nextInt();
             sc.nextLine();
 
             switch (ch) {
                 case 1:
-                    String viewTrans
-                            = "SELECT t.t_id, t.b_id, u.u_name, m.movie_name, m.showtime, "
-                            + "b.seat_no, t.booking_fee, t.payment_status, t.payment_date "
+                    String viewTrans = "SELECT u.u_id, u.u_name, u.u_email, u.u_loyalty, "
+                            + "m.movie_name, m.showtime, b.seat_no, t.booking_fee, "
+                            + "t.payment_status, t.payment_date "
                             + "FROM tbl_transaction t "
                             + "JOIN tbl_booking b ON t.b_id = b.b_id "
                             + "JOIN user_table u ON b.u_id = u.u_id "
-                            + "JOIN tbl_movies m ON b.m_id = m.m_id";
+                            + "JOIN tbl_movies m ON b.m_id = m.m_id "
+                            + "ORDER BY u.u_id, t.t_id";
 
-                    String[] headers1 = {"T_ID", "Booking ID", "Customer", "Movie", "Showtime", "Seat", "Fee", "Status", "Date"};
-                    String[] cols1 = {"t_id", "b_id", "u_name", "movie_name", "showtime", "seat_no", "booking_fee", "payment_status", "payment_date"};
-                    con.viewRecords(viewTrans, headers1, cols1);
+                    List<Map<String, Object>> data = con.fetchRecords(viewTrans);
+
+                    if (data.isEmpty()) {
+                        System.out.println("No transactions found.");
+                        break;
+                    }
+
+                    int currentUserId = -1;
+
+                    for (Map<String, Object> row : data) {
+                        int userId = Integer.parseInt(row.get("u_id").toString());
+
+                        // Display new user header once
+                        if (userId != currentUserId) {
+                            currentUserId = userId;
+                            System.out.println("\n===============================");
+                            System.out.println("Customer: " + row.get("u_name") + " (ID: " + row.get("u_id") + ")");
+                            System.out.println("Email: " + row.get("u_email"));
+                            System.out.println("Loyalty: " + row.get("u_loyalty"));
+                            System.out.println("-------------------------------");
+                        }
+
+                        // Display transaction details
+                        System.out.println("Movie: " + row.get("movie_name"));
+                        System.out.println("Seat: " + row.get("seat_no"));
+                        System.out.println("Fee: " + row.get("booking_fee"));
+                        System.out.println("Status: " + row.get("payment_status"));
+                        System.out.println("Date: " + row.get("payment_date"));
+                        System.out.println("===============================");
+                    }
                     break;
 
                 case 2:
                     System.out.print("Enter Transaction ID to update: ");
+                    if (!sc.hasNextInt()) {
+                        System.out.println("❌ Invalid ID.");
+                        sc.nextLine();
+                        break;
+                    }
                     int tid = sc.nextInt();
                     sc.nextLine();
 
@@ -544,17 +547,52 @@ public class main {
                     sc.nextLine();
 
                     String newStatus = (psChoice == 1) ? "Paid" : "Not Yet Paid";
-
                     String sqlUpdate = "UPDATE tbl_transaction SET payment_status = ? WHERE t_id = ?";
                     con.updateRecord(sqlUpdate, newStatus, tid);
                     System.out.println("✅ Payment status updated successfully!");
                     break;
 
                 case 3:
+                    System.out.print("Enter User ID to update all transactions: ");
+                    if (!sc.hasNextInt()) {
+                        System.out.println("❌ Invalid ID.");
+                        sc.nextLine();
+                        break;
+                    }
+                    int uid = sc.nextInt();
+                    sc.nextLine();
+
+                    // Check if user has existing transactions
+                    String checkUser = "SELECT 1 FROM tbl_transaction t "
+                            + "JOIN tbl_booking b ON t.b_id = b.b_id "
+                            + "WHERE b.u_id = ?";
+                    if (!con.recordExists(checkUser, uid)) {
+                        System.out.println("⚠️ No transactions found for this user.");
+                        break;
+                    }
+
+                    System.out.println("Select new payment status for all transactions:");
+                    System.out.println("1. Paid");
+                    System.out.println("2. Not Yet Paid");
+                    System.out.print("Enter choice (1-2): ");
+                    int userStatusChoice = sc.nextInt();
+                    sc.nextLine();
+
+                    String userStatus = (userStatusChoice == 1) ? "Paid" : "Not Yet Paid";
+
+                    String sqlUpdateUser = "UPDATE tbl_transaction "
+                            + "SET payment_status = ? "
+                            + "WHERE b_id IN (SELECT b_id FROM tbl_booking WHERE u_id = ?)";
+                    con.updateRecord(sqlUpdateUser, userStatus, uid);
+
+                    System.out.println("✅ All transactions for User ID " + uid + " updated to '" + userStatus + "'.");
+                    break;
+
+                case 4:
                     return;
 
                 default:
-                    System.out.println("Invalid choice!");
+                    System.out.println("❌ Invalid choice. Try again.");
             }
         }
     }
@@ -672,30 +710,45 @@ public class main {
 
                 case 3:
                     System.out.println("\n--- 🎟️ MY ACTIVE BOOKINGS ---");
+
                     String myActiveSql = ""
-                            + "SELECT b.b_id, m.movie_name, m.showtime, b.seat_no, t.payment_status, b.booking_fee "
+                            + "SELECT u.u_id, u.u_name, b.b_id, m.movie_name, m.run_time, m.showtime, "
+                            + "b.seat_no, b.booking_fee, t.payment_status, t.payment_date "
                             + "FROM tbl_booking b "
+                            + "JOIN user_table u ON b.u_id = u.u_id "
                             + "JOIN tbl_movies m ON b.m_id = m.m_id "
                             + "LEFT JOIN tbl_transaction t ON b.b_id = t.b_id "
                             + "WHERE b.u_id = ? AND b.canceled = 0";
+
                     List<Map<String, Object>> activeBookings = con.fetchRecords(myActiveSql, userId);
 
                     if (activeBookings == null || activeBookings.isEmpty()) {
-                        System.out.println("You have no active tickets.");
+                        System.out.println("⚠️ You have no active bookings.");
                         break;
                     }
 
-                    System.out.printf("%-10s %-20s %-15s %-10s %-10s %-15s\n",
-                            "Book ID", "Movie", "Showtime", "Seat", "Fee", "Status");
+                    System.out.println("\n==================== BOOKING RECEIPTS ====================\n");
+
                     for (Map<String, Object> b : activeBookings) {
-                        System.out.printf("%-10s %-20s %-15s %-10s %-10s %-15s\n",
-                                b.get("b_id"), b.get("movie_name"), b.get("showtime"),
-                                b.get("seat_no"), b.get("booking_fee"),
-                                (b.get("payment_status") == null ? "Not Yet Paid" : b.get("payment_status")));
+                        System.out.println("🎟️ MOVIE TICKET RECEIPT");
+                        System.out.println("----------------------------------------------------------");
+                        System.out.println("🎫 BOOKING ID  : " + b.get("b_id"));
+                        System.out.println("👤 USER ID     : " + b.get("u_id"));
+                        System.out.println("🧾 NAME        : " + b.get("u_name"));
+                        System.out.println("📅 PAYMENT DATE: " + (b.get("payment_date") == null ? "N/A" : b.get("payment_date")));
+                        System.out.println("🎬 MOVIE TITLE : " + b.get("movie_name"));
+                        System.out.println("⏱ RUN TIME    : " + b.get("run_time"));
+                        System.out.println("🕒 SHOWTIME    : " + b.get("showtime"));
+                        System.out.println("💺 SEAT NUMBER : " + b.get("seat_no"));
+                        System.out.println("💰 BOOKING FEE : ₱" + b.get("booking_fee"));
+                        System.out.println("💳 PAYMENT     : " + (b.get("payment_status") == null ? "Not Yet Paid" : b.get("payment_status")));
+                        System.out.println("----------------------------------------------------------\n");
                     }
+
+                    System.out.println("==========================================================\n");
                     break;
 
-                case 4:                    
+                case 4:
                     System.out.print("Enter Booking ID to Cancel: ");
                     int cancelId = sc.nextInt();
 
