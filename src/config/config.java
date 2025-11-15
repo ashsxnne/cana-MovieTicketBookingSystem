@@ -9,8 +9,7 @@ public class config {
         Connection con = null;
         try {
             Class.forName("org.sqlite.JDBC"); // Load the SQLite JDBC driver
-            con = DriverManager.getConnection("jdbc:sqlite:movie.db"); // Establish connection
-            System.out.println("Connection Successful");
+            con = DriverManager.getConnection("jdbc:sqlite:movie.db"); // Establish connection          
         } catch (Exception e) {
             System.out.println("Connection Failed: " + e);
         }
@@ -45,7 +44,6 @@ public class config {
             }
 
             pstmt.executeUpdate();
-            System.out.println("Record added successfully!");
         } catch (SQLException e) {
             System.out.println("Error adding record: " + e.getMessage());
         }

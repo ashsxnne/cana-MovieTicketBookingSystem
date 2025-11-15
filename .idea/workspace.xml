@@ -2,8 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e4be6c68-ab44-468e-a9bb-bf22025cf4e5" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Data Dictionary.docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Data Dictionary.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Movie Ticket Booking Manual.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/~$vie Ticket Booking Manual.docx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/~WRL2324.tmp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Movie Ticket Booking Manual.docx" beforeDir="false" afterPath="$PROJECT_DIR$/Movie Ticket Booking Manual.docx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/movie.db" beforeDir="false" afterPath="$PROJECT_DIR$/movie.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nbproject/private/private.xml" beforeDir="false" afterPath="$PROJECT_DIR$/nbproject/private/private.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
